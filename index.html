@@ -177,6 +177,7 @@ section { padding: 80px 24px; }
   aspect-ratio: 16/9;
 }
 .vsl-wrapper iframe { width: 100%; height: 100%; display: block; }
+.vsl-wrapper video { width: 100%; height: 100%; display: block; object-fit: cover; background:#000; }
 
 /* === DUAL CTA === */
 .dual-cta-section {
@@ -861,13 +862,10 @@ section { padding: 80px 24px; }
     <h2>Watch This Before You Book</h2>
     <p>Dr. Madhu Sudan explains exactly what happens in your consultation and what to expect</p>
     <div class="vsl-wrapper">
-      <iframe
-        src="https://player.cloudinary.com/embed/?cloud_name=dvcmkibgp&public_id=VSL_Dr_Madhu_Consult_qxoepy"
-        width="640" height="360"
-        allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-        allowfullscreen
-        frameborder="0">
-      </iframe>
+      <video controls playsinline preload="metadata" poster="dr-madhu-quote.jpg">
+        <source src="https://res.cloudinary.com/dvcmkibgp/video/upload/VSL_Dr_Madhu_Consult_qxoepy.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
     </div>
   </div>
 </section>
@@ -1335,4 +1333,3 @@ setInterval(() => changeSlide(1), 6000);
 </script>
 </body>
 </html>
-
