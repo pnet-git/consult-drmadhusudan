@@ -626,41 +626,48 @@ section { padding: 80px 24px; }
 .celebrity-photo:hover { transform: translateY(-6px); box-shadow: 0 18px 45px rgba(91,14,37,0.28); }
 .celebrity-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-/* === TESTIMONIALS === */
+/* === TESTIMONIALS (sliding carousel — Modak parity) === */
 .testimonials-section {
   background: var(--cream-dark);
   padding: 80px 24px;
   text-align: center;
 }
-.carousel-wrapper { position: relative; max-width: 800px; margin: 40px auto 0; }
-.carousel-track { overflow: hidden; border-radius: 16px; }
-.testimonial-slide { display: none; }
-.testimonial-slide.active { display: block; }
-.testimonial-slide img { width: 100%; border-radius: 16px; box-shadow: var(--shadow-md); }
+.testimonial-carousel-wrapper { position: relative; width: 100%; max-width: 800px; margin: 40px auto 0; overflow: hidden; }
+.testimonial-carousel { display: flex; transition: transform 0.6s ease; width: 100%; }
+.testimonial-slide { min-width: 100%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.testimonial-slide img { max-height: 500px; width: 100%; object-fit: contain; border-radius: 16px; box-shadow: var(--shadow-md); }
 .carousel-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: white;
-  border: 2px solid var(--gold);
-  color: var(--maroon);
-  width: 48px; height: 48px;
+  background: rgba(139,21,56,0.85);
+  color: white;
+  backdrop-filter: blur(5px);
+  border: none;
+  width: 50px; height: 50px;
   border-radius: 50%;
-  font-size: 20px;
+  font-size: 24px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 12px rgba(139,21,56,0.25);
   transition: all 0.3s ease;
   z-index: 10;
 }
-.carousel-arrow:hover { background: var(--maroon); color: white; }
-.carousel-prev { left: -24px; }
-.carousel-next { right: -24px; }
-.carousel-dots { display: flex; justify-content: center; gap: 8px; margin-top: 20px; }
-.dot { width: 8px; height: 8px; background: rgba(139,21,56,0.2); border-radius: 50%; cursor: pointer; transition: all 0.3s; }
-.dot.active { background: var(--maroon); width: 24px; border-radius: 4px; }
+.carousel-arrow:hover { background: var(--maroon-dark); transform: translateY(-50%) scale(1.1); }
+.carousel-prev { left: 15px; }
+.carousel-next { right: 15px; }
+.carousel-dots { display: flex; justify-content: center; gap: 12px; margin-top: 30px; }
+.dot { width: 12px; height: 12px; border-radius: 50%; background: #E0E0E0; cursor: pointer; transition: all 0.3s ease; border: 2px solid transparent; }
+.dot.active { background: var(--maroon); width: 14px; height: 14px; }
+.dot:hover { background: var(--gold); }
+@media (max-width: 768px) {
+  .carousel-arrow { width: 40px; height: 40px; font-size: 18px; }
+  .carousel-prev { left: 0; }
+  .carousel-next { right: 0; }
+  .testimonial-slide img { max-height: 400px; }
+}
 
 /* === FAQ === */
 .faq-section {
@@ -1200,22 +1207,26 @@ html[data-lang="hi"] body { }
   <div class="reveal">
     <div class="section-eyebrow">Patient Stories</div>
     <h2 class="section-title">Real People. <span class="accent">Real Results.</span></h2>
-    <div class="carousel-wrapper">
-      <div class="carousel-track">
-        <div class="testimonial-slide active"><img src="testimonial-1.jpg" alt="Patient testimonial"></div>
+    <div class="testimonial-carousel-wrapper">
+      <div class="testimonial-carousel" id="testimonialCarousel">
+        <div class="testimonial-slide"><img src="testimonial-1.jpg" alt="Patient testimonial"></div>
         <div class="testimonial-slide"><img src="testimonial-2.jpg" alt="Patient testimonial"></div>
         <div class="testimonial-slide"><img src="testimonial-3.jpg" alt="Patient testimonial"></div>
         <div class="testimonial-slide"><img src="testimonial-4.jpg" alt="Patient testimonial"></div>
         <div class="testimonial-slide"><img src="testimonial-5.jpg" alt="Patient testimonial"></div>
+        <div class="testimonial-slide"><img src="testimonial-6.jpg" alt="Patient testimonial"></div>
+        <div class="testimonial-slide"><img src="testimonial-7.jpg" alt="Patient testimonial"></div>
       </div>
-      <button class="carousel-arrow carousel-prev" onclick="changeSlide(-1)">‹</button>
-      <button class="carousel-arrow carousel-next" onclick="changeSlide(1)">›</button>
+      <button class="carousel-arrow carousel-prev" onclick="testimonialCarousel.prev()">&#10094;</button>
+      <button class="carousel-arrow carousel-next" onclick="testimonialCarousel.next()">&#10095;</button>
       <div class="carousel-dots">
-        <div class="dot active" onclick="goToSlide(0)"></div>
-        <div class="dot" onclick="goToSlide(1)"></div>
-        <div class="dot" onclick="goToSlide(2)"></div>
-        <div class="dot" onclick="goToSlide(3)"></div>
-        <div class="dot" onclick="goToSlide(4)"></div>
+        <span class="dot active" onclick="testimonialCarousel.goTo(0)"></span>
+        <span class="dot" onclick="testimonialCarousel.goTo(1)"></span>
+        <span class="dot" onclick="testimonialCarousel.goTo(2)"></span>
+        <span class="dot" onclick="testimonialCarousel.goTo(3)"></span>
+        <span class="dot" onclick="testimonialCarousel.goTo(4)"></span>
+        <span class="dot" onclick="testimonialCarousel.goTo(5)"></span>
+        <span class="dot" onclick="testimonialCarousel.goTo(6)"></span>
       </div>
     </div>
   </div>
@@ -1352,19 +1363,35 @@ function toggleFaq(el) {
   if (!wasOpen) el.classList.add('open');
 }
 
-// === TESTIMONIAL CAROUSEL ===
-let currentSlide = 0;
-const slides = document.querySelectorAll('.testimonial-slide');
-const dots = document.querySelectorAll('.dot');
-function goToSlide(n) {
-  slides[currentSlide].classList.remove('active');
-  dots[currentSlide].classList.remove('active');
-  currentSlide = (n + slides.length) % slides.length;
-  slides[currentSlide].classList.add('active');
-  dots[currentSlide].classList.add('active');
-}
-function changeSlide(dir) { goToSlide(currentSlide + dir); }
-setInterval(() => changeSlide(1), 6000);
+// === TESTIMONIAL CAROUSEL (sliding — Modak parity) ===
+const testimonialCarousel = {
+  currentIndex: 0,
+  totalSlides: 7,
+  autoPlayInterval: null,
+  init() {
+    this.updateCarousel();
+    this.startAutoPlay();
+    const w = document.querySelector('.testimonial-carousel-wrapper');
+    if (w) {
+      w.addEventListener('mouseenter', () => this.stopAutoPlay());
+      w.addEventListener('mouseleave', () => this.startAutoPlay());
+    }
+  },
+  updateCarousel() {
+    const c = document.getElementById('testimonialCarousel');
+    if (c) c.style.transform = `translateX(${-this.currentIndex * 100}%)`;
+    document.querySelectorAll('.testimonials-section .dot').forEach((dot, idx) => {
+      dot.classList.toggle('active', idx === this.currentIndex);
+    });
+  },
+  next() { this.currentIndex = (this.currentIndex + 1) % this.totalSlides; this.updateCarousel(); this.restartAutoPlay(); },
+  prev() { this.currentIndex = (this.currentIndex - 1 + this.totalSlides) % this.totalSlides; this.updateCarousel(); this.restartAutoPlay(); },
+  goTo(i) { this.currentIndex = i; this.updateCarousel(); this.restartAutoPlay(); },
+  startAutoPlay() { this.autoPlayInterval = setInterval(() => this.next(), 6000); },
+  stopAutoPlay() { clearInterval(this.autoPlayInterval); },
+  restartAutoPlay() { this.stopAutoPlay(); this.startAutoPlay(); }
+};
+document.addEventListener('DOMContentLoaded', () => testimonialCarousel.init());
 </script>
 
 <!-- ============ LEAD MODAL (Cashfree) ============ -->
