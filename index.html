@@ -848,6 +848,21 @@ section { padding: 80px 24px; }
 .lang-btn { border: none; background: transparent; color: var(--maroon-dark); font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 13px; padding: 7px 14px; cursor: pointer; transition: all 0.2s ease; }
 .lang-btn.active { background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%); color: #fff; }
 @media (max-width: 768px) { .lang-toggle { top: 66px; right: 10px; } .lang-btn { font-size: 12px; padding: 6px 12px; } }
+/* === LANGUAGE CHOICE POPUP (first visit only) === */
+.lang-pop-overlay { position: fixed; inset: 0; background: rgba(26,14,14,0.72); display: none; align-items: center; justify-content: center; z-index: 4000; padding: 20px; backdrop-filter: blur(6px); }
+.lang-pop-overlay.active { display: flex; }
+.lang-pop { background: var(--cream); border-radius: 22px; max-width: 420px; width: 100%; padding: 40px 34px 34px; text-align: center; box-shadow: 0 24px 70px rgba(91,14,37,0.45); border: 2px solid var(--gold); animation: langPopIn 0.4s cubic-bezier(0.2,0.8,0.2,1); }
+@keyframes langPopIn { from { opacity:0; transform: translateY(24px) scale(0.96);} to { opacity:1; transform: translateY(0) scale(1);} }
+.lang-pop-crest { font-family:'Cormorant Garamond',serif; font-size:15px; letter-spacing:2px; text-transform:uppercase; color: var(--gold); font-weight:700; margin-bottom:10px; }
+.lang-pop h3 { font-family:'Cormorant Garamond',serif; font-size:28px; color: var(--maroon-dark); line-height:1.25; margin-bottom:6px; font-weight:700; }
+.lang-pop .sub { font-size:14px; color: var(--ink-soft); margin-bottom:26px; }
+.lang-pop-btns { display:flex; flex-direction:column; gap:12px; }
+.lang-pop-btn { display:block; width:100%; padding:16px 20px; border-radius:50px; font-family:'DM Sans',sans-serif; font-size:16px; font-weight:700; cursor:pointer; transition: all .25s ease; border:2px solid var(--maroon); }
+.lang-pop-btn.en { background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%); color:#fff; box-shadow:0 8px 22px rgba(139,21,56,0.32); }
+.lang-pop-btn.en:hover { transform: translateY(-2px); }
+.lang-pop-btn.hi { background: var(--white); color: var(--maroon-dark); }
+.lang-pop-btn.hi:hover { background: var(--cream-dark); transform: translateY(-2px); }
+.lang-pop-btn small { display:block; font-weight:500; font-size:12px; opacity:0.8; margin-top:2px; }
 html[data-lang="hi"] body { }
 </style>
 </head>
@@ -857,6 +872,19 @@ html[data-lang="hi"] body { }
 <div class="lang-toggle" id="langToggle">
   <button class="lang-btn active" data-lang="en" onclick="setLang('en')">EN</button>
   <button class="lang-btn" data-lang="hi" onclick="setLang('hi')">हिं</button>
+</div>
+
+<!-- LANGUAGE CHOICE POPUP (first visit only) -->
+<div class="lang-pop-overlay" id="langPop">
+  <div class="lang-pop">
+    <div class="lang-pop-crest">Dr. Madhu Sudan</div>
+    <h3>Choose Your Language<br>अपनी भाषा चुनें</h3>
+    <p class="sub">Read this page in the language you're most comfortable with.</p>
+    <div class="lang-pop-btns">
+      <button class="lang-pop-btn en" onclick="chooseLang('en')">Continue in English</button>
+      <button class="lang-pop-btn hi" onclick="chooseLang('hi')">हिंदी में पढ़ें<small>Read in Hindi</small></button>
+    </div>
+  </div>
 </div>
 
 <!-- STICKY BANNER -->
@@ -1598,12 +1626,25 @@ const HI = {
     try { localStorage.setItem('consult_lang', lang); } catch(e){}
     document.documentElement.lang = (lang==='hi') ? 'hi' : 'en';
   };
-  // default English; restore saved choice if any
+  // popup choice -> set language + close (setLang already saves the choice)
+  window.chooseLang = function(lang){
+    window.setLang(lang);
+    var pop = document.getElementById('langPop');
+    if (pop) pop.classList.remove('active');
+    document.body.style.overflow = '';
+  };
+  // default English; restore saved choice, else show the first-visit popup
   document.addEventListener('DOMContentLoaded', function(){
     snapshot();
     var saved = null;
     try { saved = localStorage.getItem('consult_lang'); } catch(e){}
-    if (saved==='hi') setLang('hi');
+    if (saved==='hi') { window.setLang('hi'); }
+    else if (saved==='en') { /* already English, do nothing */ }
+    else {
+      // no choice yet -> show popup once
+      var pop = document.getElementById('langPop');
+      if (pop) { pop.classList.add('active'); }
+    }
   });
 })();
 </script>
