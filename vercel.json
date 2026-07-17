@@ -2,13 +2,10 @@
   "buildCommand": "echo 'No build needed for static site'",
   "outputDirectory": ".",
   "rewrites": [
-    {
-      "source": "/thank-you",
-      "destination": "/thank-you/index.html"
-    },
-    {
-      "source": "/((?!api/).*)",
-      "destination": "/index.html"
-    }
+    { "source": "/thank-you", "destination": "/thank-you/index.html" },
+    { "source": "/contact", "destination": "/contact/index.html" },
+    { "source": "/terms", "destination": "/terms/index.html" },
+    { "source": "/refund-policy", "destination": "/refund-policy/index.html" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
