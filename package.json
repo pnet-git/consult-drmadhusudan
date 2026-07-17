@@ -1,0 +1,9 @@
+{
+  "name": "consult-drmadhusudan",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dr. Madhu consultation landing page with Cashfree checkout",
+  "dependencies": {
+    "cashfree-pg": "^4.3.0"
+  }
+}

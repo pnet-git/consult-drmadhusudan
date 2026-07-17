@@ -13,6 +13,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+<!-- Cashfree JS SDK v3 -->
+<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+
 <style>
 :root {
   --maroon: #8B1538;
@@ -194,6 +197,21 @@ section { padding: 80px 24px; }
   margin-left: auto;
   margin-right: auto;
 }
+.single-cta-grid { display: grid; grid-template-columns: 1fr; max-width: 460px; margin: 0 auto; }
+.final-single-grid { display: grid; grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; }
+/* Lead modal */
+.cf-modal-overlay { position: fixed; inset: 0; background: rgba(26,14,14,0.85); display: none; align-items: center; justify-content: center; z-index: 3000; padding: 20px; backdrop-filter: blur(6px); }
+.cf-modal-overlay.active { display: flex; }
+.cf-modal { background: var(--cream); border-radius: 20px; max-width: 440px; width: 100%; padding: 40px 32px; position: relative; box-shadow: var(--shadow-lg); }
+.cf-modal h3 { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--maroon-dark); text-align: center; margin-bottom: 6px; }
+.cf-modal p.cf-sub { text-align: center; color: var(--ink-soft); font-size: 14px; margin-bottom: 22px; }
+.cf-modal .form-group { margin-bottom: 14px; }
+.cf-modal input { width: 100%; padding: 14px 16px; border: 2px solid rgba(139,21,56,0.15); border-radius: 10px; font-size: 15px; font-family: 'DM Sans', sans-serif; background: #fff; color: var(--ink); }
+.cf-modal input:focus { outline: none; border-color: var(--maroon); }
+.cf-modal .btn-primary { width: 100%; margin-top: 6px; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.cf-modal-close { position: absolute; top: 14px; right: 16px; background: none; border: none; font-size: 26px; color: var(--ink-soft); cursor: pointer; line-height: 1; }
+.cf-modal-trust { text-align: center; margin-top: 16px; font-size: 12px; color: var(--ink-soft); }
+.cf-price-chip { display:block; text-align:center; margin: 0 auto 20px; background: rgba(201,161,74,0.12); border:1px solid var(--gold); color: var(--maroon-dark); font-weight:700; padding:8px 16px; border-radius:50px; width:fit-content; font-size:14px; }
 .dual-cta-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -824,9 +842,22 @@ section { padding: 80px 24px; }
   .hero h1 { font-size: 26px; }
   .section-title { font-size: 24px; }
 }
+
+/* === LANGUAGE TOGGLE === */
+.lang-toggle { position: fixed; top: 60px; right: 14px; z-index: 1200; display: flex; background: rgba(255,255,255,0.95); border: 1.5px solid var(--gold); border-radius: 50px; overflow: hidden; box-shadow: 0 4px 14px rgba(91,14,37,0.18); }
+.lang-btn { border: none; background: transparent; color: var(--maroon-dark); font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 13px; padding: 7px 14px; cursor: pointer; transition: all 0.2s ease; }
+.lang-btn.active { background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%); color: #fff; }
+@media (max-width: 768px) { .lang-toggle { top: 66px; right: 10px; } .lang-btn { font-size: 12px; padding: 6px 12px; } }
+html[data-lang="hi"] body { }
 </style>
 </head>
 <body>
+
+<!-- LANGUAGE TOGGLE -->
+<div class="lang-toggle" id="langToggle">
+  <button class="lang-btn active" data-lang="en" onclick="setLang('en')">EN</button>
+  <button class="lang-btn" data-lang="hi" onclick="setLang('hi')">हिं</button>
+</div>
 
 <!-- STICKY BANNER -->
 <div class="discount-banner">
@@ -844,7 +875,7 @@ section { padding: 80px 24px; }
     <div class="hero-badge">★ 14+ Years · 1,14,000+ Patients · 100% Ayurvedic</div>
     <h1>Stop Suffering In Silence.<br>Talk Directly To <span class="accent">Dr. Madhu Sudan</span> — Today.</h1>
     <p class="hero-sub">India's leading Ayurvedic Sexologist answers your most private questions — personally, confidentially, and without judgment. Results visible in 3–5 days.</p>
-    <a href="#choose-plan" class="btn-primary" style="display: inline-block; padding: 18px 44px; font-size: 17px; border-radius: 50px; text-decoration: none; background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%); color: white; font-weight: 700; box-shadow: 0 8px 24px rgba(139,21,56,0.35);">👉 Book My Private Consultation</a>
+    <button class="btn-primary" style="display: inline-block; padding: 18px 44px; font-size: 17px; border-radius: 50px; border:none; cursor:pointer; background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%); color: white; font-weight: 700; box-shadow: 0 8px 24px rgba(139,21,56,0.35); font-family:'DM Sans',sans-serif;" onclick="openConsultModal()">👉 Book My Private Consultation</button>
     <div class="hero-trust">
       <div class="hero-trust-item">100% Confidential</div>
       <div class="hero-trust-item">Direct With Dr. Madhu</div>
@@ -876,34 +907,13 @@ section { padding: 80px 24px; }
 <section class="dual-cta-section" id="choose-plan">
   <div class="reveal">
     <div class="section-eyebrow">Choose Your Plan</div>
-    <h2 class="section-title">Two Ways To Start Your <span class="accent">Healing Journey</span></h2>
-    <p class="sub">Both options get you direct access to Dr. Madhu Sudan. Pick what works best for you.</p>
+    <h2 class="section-title">Start Your <span class="accent">Healing Journey</span> Today</h2>
+    <p class="sub">One private session, direct with Dr. Madhu Sudan. No middlemen, no judgment.</p>
 
-    <div class="dual-cta-grid">
-
-      <!-- OPTION A: BEST VALUE -->
+    <div class="single-cta-grid">
       <div class="cta-card featured">
-        <div class="cta-card-badge">⭐ Best Value — Most Popular</div>
-        <h3>Trial Pack + FREE Consultation</h3>
-        <div class="price-old">Worth ₹2,989</div>
-        <div class="price-new">₹1,490</div>
-        <div class="price-note">You save ₹1,499 — Consultation is FREE</div>
-        <ul>
-          <li>Kamdev Modak 7-Day Trial Pack</li>
-          <li>FREE 1:1 Private Consultation with Dr. Madhu</li>
-          <li>Feel results in 72 hours</li>
-          <li>Personalized treatment plan</li>
-          <li>Sexual Health Self-Assessment</li>
-          <li>Daily Sexual Health Power Routine PDF</li>
-          <li>7-day WhatsApp follow-up support</li>
-          <li>Discreet packaging & delivery</li>
-        </ul>
-        <a href="https://rzp.io/rzp/igtS6lgg" class="btn-primary">✓ Get Trial Pack + FREE Consult →</a>
-      </div>
-
-      <!-- OPTION B: CONSULTATION ONLY -->
-      <div class="cta-card">
-        <h3>Consultation Only</h3>
+        <div class="cta-card-badge">⭐ Direct With Dr. Madhu</div>
+        <h3>1:1 Private Consultation</h3>
         <div class="price-old">₹999</div>
         <div class="price-new">₹497</div>
         <div class="price-note">30-minute private session with Dr. Madhu</div>
@@ -911,13 +921,12 @@ section { padding: 80px 24px; }
           <li>1:1 Private Consultation with Dr. Madhu</li>
           <li>Personalized diagnosis & treatment plan</li>
           <li>100% confidential — zero judgment</li>
-          <li>Sexual Health Self-Assessment</li>
-          <li>Daily Sexual Health Power Routine PDF</li>
+          <li>Online or in-clinic — your choice</li>
+          <li>Results visible in 3–5 days</li>
           <li>7-day WhatsApp follow-up support</li>
         </ul>
-        <a href="https://pages.razorpay.com/consult-now" class="btn-secondary">Book Consultation — ₹497 →</a>
+        <button class="btn-primary" onclick="openConsultModal()">Book My Consultation — ₹497 →</button>
       </div>
-
     </div>
   </div>
 </section>
@@ -1015,7 +1024,7 @@ section { padding: 80px 24px; }
   <div class="reveal">
     <div class="section-eyebrow" style="background: rgba(201,161,74,0.15); color: var(--gold-light);">What You Get</div>
     <h2 class="section-title" style="color: var(--gold-light);">Everything Included In<br><span style="font-style: italic; color: white;">Your Consultation Today</span></h2>
-    <p class="sub">Your consultation today — 50% off, plus ₹4,499 in bonuses free</p>
+    <p class="sub">Your consultation today — 50% off, plus free bonuses included</p>
     <div class="value-stack">
       <div class="value-item">
         <div class="value-item-left">
@@ -1066,7 +1075,7 @@ section { padding: 80px 24px; }
         <div class="value-you-pay-price">₹497 only</div>
       </div>
     </div>
-    <a href="#choose-plan" class="btn-gold" style="display: inline-block; padding: 18px 50px; font-size: 17px; border-radius: 50px; text-decoration: none;">✓ Book My Consultation Now →</a>
+    <button class="btn-gold" style="display: inline-block; padding: 18px 50px; font-size: 17px; border-radius: 50px; border:none; cursor:pointer; font-family:'DM Sans',sans-serif;" onclick="openConsultModal()">✓ Book My Consultation Now →</button>
   </div>
 </section>
 
@@ -1081,7 +1090,7 @@ section { padding: 80px 24px; }
       <div class="step-card">
         <div class="step-number">1</div>
         <h3>Book Your Slot</h3>
-        <p>Pay ₹497 (or get it FREE with Trial Pack). Dr. Madhu's team confirms your appointment on WhatsApp within 2 hours.</p>
+        <p>Pay ₹497 to reserve your slot. Dr. Madhu's team confirms your appointment on WhatsApp within 2 hours.</p>
       </div>
       <div class="step-card">
         <div class="step-number">2</div>
@@ -1224,8 +1233,8 @@ section { padding: 80px 24px; }
       </div>
 
       <div class="faq-item" onclick="toggleFaq(this)">
-        <div class="faq-question">What's the difference between ₹1,490 and ₹497 options?</div>
-        <div class="faq-answer">With ₹497 you get the consultation only. With ₹1,490 you get Kamdev Modak's 7-day Trial Pack + the consultation absolutely FREE. The consultation alone is worth ₹999, so the ₹1,490 option saves you ₹1,499 and gives you Dr. Madhu's personally formulated medicine to start alongside your session. Most patients choose this option.</div>
+        <div class="faq-question">Is the consultation online or in-clinic?</div>
+        <div class="faq-answer">Both options are available. You can consult Dr. Madhu Sudan from the comfort of your home over a private video call, or visit one of his clinics in Kalkaji or Gurgaon. When Dr. Madhu's team confirms your appointment on WhatsApp, you can tell them which you prefer.</div>
       </div>
 
     </div>
@@ -1240,19 +1249,12 @@ section { padding: 80px 24px; }
     <h2>Your Partner Deserves The Best Version Of You.</h2>
     <p>Don't let another day go by. Book your private consultation with Dr. Madhu Sudan today — and start your healing journey.</p>
 
-    <div class="final-dual-grid">
+    <div class="final-single-grid">
       <div class="final-cta-card featured">
-        <div class="cta-card-badge" style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--gold); color: var(--maroon-dark); padding: 6px 20px; border-radius: 50px; font-size: 12px; font-weight: 800; letter-spacing: 1px; white-space: nowrap;">⭐ Best Value</div>
-        <h3>Trial Pack + FREE Consult</h3>
-        <div class="price">₹1,490</div>
-        <div class="note">Consultation worth ₹999 — yours FREE</div>
-        <a href="https://rzp.io/rzp/igtS6lgg" class="btn-gold">Get Trial Pack + Free Consult →</a>
-      </div>
-      <div class="final-cta-card">
-        <h3>Consultation Only</h3>
+        <h3>1:1 Private Consultation</h3>
         <div class="price">₹497</div>
-        <div class="note">30-min private session · All bonuses included</div>
-        <a href="https://pages.razorpay.com/consult-now" class="btn-white">Book Consultation — ₹497 →</a>
+        <div class="note">30-min private session · direct with Dr. Madhu</div>
+        <button class="btn-gold" onclick="openConsultModal()">Book My Consultation — ₹497 →</button>
       </div>
     </div>
   </div>
@@ -1269,9 +1271,9 @@ section { padding: 80px 24px; }
 <div class="sticky-footer">
   <div class="sticky-footer-left">
     <div class="sticky-footer-price"><s>₹999</s> ₹497 only</div>
-    <div class="sticky-footer-note">Or FREE with Trial Pack (₹1,490)</div>
+    <div class="sticky-footer-note">Direct with Dr. Madhu · 100% confidential</div>
   </div>
-  <a href="#choose-plan" class="sticky-footer-btn">Book Now →</a>
+  <button class="sticky-footer-btn" style="border:none;cursor:pointer;font-family:'DM Sans',sans-serif;" onclick="openConsultModal()">Book Now →</button>
 </div>
 
 <script>
@@ -1331,5 +1333,273 @@ function goToSlide(n) {
 function changeSlide(dir) { goToSlide(currentSlide + dir); }
 setInterval(() => changeSlide(1), 6000);
 </script>
+
+<!-- ============ LEAD MODAL (Cashfree) ============ -->
+<div class="cf-modal-overlay" id="consultModal" onclick="closeConsultModalOutside(event)">
+  <div class="cf-modal">
+    <button class="cf-modal-close" onclick="closeConsultModal()">×</button>
+    <h3>Book Your Private Consultation</h3>
+    <p class="cf-sub">Enter your details — you'll go straight to secure checkout. Dr. Madhu's team confirms your slot on WhatsApp within 2 hours.</p>
+    <span class="cf-price-chip">1:1 Consultation — ₹497</span>
+    <form id="consultForm" onsubmit="handleConsultSubmit(event)">
+      <div class="form-group"><input type="text" name="first_name" placeholder="First Name" required></div>
+      <div class="form-group"><input type="email" name="email_address" placeholder="Email Address" required></div>
+      <div class="form-group"><input type="tel" name="phone_number" placeholder="Phone Number" required></div>
+      <button type="submit" class="btn-primary">✓ Continue To Secure Checkout →</button>
+    </form>
+    <p class="cf-modal-trust">🔒 100% confidential · secure payment by Cashfree</p>
+  </div>
+</div>
+
+<script>
+// ===== CONSULT LEAD MODAL + CASHFREE CHECKOUT =====
+function openConsultModal() {
+  document.getElementById("consultModal").classList.add("active");
+  document.body.style.overflow = "hidden";
+  if (typeof fbq !== "undefined") fbq("track", "InitiateCheckout", { content_name: "consult" });
+}
+function closeConsultModal() {
+  document.getElementById("consultModal").classList.remove("active");
+  document.body.style.overflow = "";
+}
+function closeConsultModalOutside(e) { if (e.target.id === "consultModal") closeConsultModal(); }
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeConsultModal(); });
+
+function handleConsultSubmit(e) {
+  e.preventDefault();
+  const g = (n) => { const el = e.target.querySelector(`[name="${n}"]`); return el ? el.value.trim() : ""; };
+  const firstName = g("first_name");
+  const email = g("email_address");
+  const phone = g("phone_number");
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (firstName.length < 2) { alert("Please enter a valid name"); return; }
+  if (!emailRegex.test(email)) { alert("Please enter a valid email address"); return; }
+  const phoneDigits = phone.replace(/\D/g, "");
+  if (phoneDigits.length < 8 || phoneDigits.length > 15) { alert("Please enter a valid phone number"); return; }
+
+  // stash buyer details so the thank-you page can fire the Kit paid-tag after payment
+  try {
+    sessionStorage.setItem("consult_buyer", JSON.stringify({ name: firstName, email: email, phone: phoneDigits }));
+  } catch (err) {}
+
+  if (typeof fbq !== "undefined") fbq("track", "AddToCart", { content_name: "consult" });
+  startConsultCheckout(firstName, email, phoneDigits);
+}
+
+async function startConsultCheckout(name, email, phone) {
+  const btn = document.querySelector("#consultForm button[type='submit']");
+  const original = btn ? btn.innerHTML : "";
+  if (btn) { btn.disabled = true; btn.innerHTML = "Processing…"; }
+  try {
+    const resp = await fetch("/api/create-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pack: "consult", name, email, phone })
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.payment_session_id) { throw new Error(data.error || "Could not start payment"); }
+
+    const mode = (data.env === "production") ? "production" : "sandbox";
+    const orderId = data.order_id, amount = data.amount;
+    const cashfree = Cashfree({ mode });
+    cashfree.checkout({ paymentSessionId: data.payment_session_id, redirectTarget: "_modal" })
+      .then((result) => {
+        if (result && result.error) { if (btn) { btn.disabled = false; btn.innerHTML = original; } return; }
+        var tyUrl = "/thank-you?order_id=" + encodeURIComponent(orderId || "") +
+                    "&amount=" + encodeURIComponent(amount || "") + "&pack=consult";
+        window.location.href = tyUrl;
+      });
+  } catch (err) {
+    alert("Sorry, we couldn't start the payment. Please try again.");
+    if (btn) { btn.disabled = false; btn.innerHTML = original; }
+  }
+}
+</script>
+// EN -> HI (Hinglish in Devanagari, Dr. Madhu's landing-page voice).
+// Keys are the EXACT English text as it appears on the page. Edit any Hindi line here.
+const HI = {
+  // ===== BANNER / HERO =====
+  "🔒 LIMITED SLOTS TODAY — Consult Directly With Dr. Madhu Sudan": "🔒 आज सीमित स्लॉट — सीधे Dr. Madhu Sudan से बात करें",
+  "Slots Filling Fast": "स्लॉट तेज़ी से भर रहे हैं",
+  "★ 14+ Years · 1,14,000+ Patients · 100% Ayurvedic": "★ 14+ साल · 1,14,000+ मरीज़ · 100% आयुर्वेदिक",
+  "Stop Suffering In Silence.": "अब चुपचाप मत सहिए।",
+  "Talk Directly To": "सीधे बात कीजिए",
+  "— Today.": "— आज ही।",
+  "India's leading Ayurvedic Sexologist answers your most private questions — personally, confidentially, and without judgment. Results visible in 3–5 days.": "भारत के प्रमुख आयुर्वेदिक सेक्सोलॉजिस्ट आपके सबसे निजी सवालों का जवाब खुद देते हैं — पूरी तरह गोपनीय, बिना किसी झिझक के। असर 3–5 दिनों में दिखता है।",
+  "👉 Book My Private Consultation": "👉 मेरी प्राइवेट कंसल्टेशन बुक करें",
+  "100% Confidential": "100% गोपनीय",
+  "Direct With Dr. Madhu": "सीधे Dr. Madhu से",
+  "No Side Effects": "कोई साइड इफेक्ट नहीं",
+  "Permanent Solution": "स्थायी समाधान",
+
+  // ===== VSL =====
+  "Watch This Before You Book": "बुक करने से पहले यह देखें",
+  "Dr. Madhu Sudan explains exactly what happens in your consultation and what to expect": "Dr. Madhu Sudan खुद बताते हैं कि कंसल्टेशन में क्या होता है और आपको क्या उम्मीद रखनी चाहिए",
+
+  // ===== CHOOSE PLAN =====
+  "Choose Your Plan": "अपना प्लान चुनें",
+  "Start Your": "शुरू करें अपनी",
+  "Healing Journey": "इलाज की यात्रा",
+  "Today": "आज ही",
+  "One private session, direct with Dr. Madhu Sudan. No middlemen, no judgment.": "एक प्राइवेट सेशन, सीधे Dr. Madhu Sudan के साथ। न कोई बिचौलिया, न कोई झिझक।",
+  "⭐ Direct With Dr. Madhu": "⭐ सीधे Dr. Madhu से",
+  "1:1 Private Consultation": "1:1 प्राइवेट कंसल्टेशन",
+  "30-minute private session with Dr. Madhu": "Dr. Madhu के साथ 30 मिनट का प्राइवेट सेशन",
+  "1:1 Private Consultation with Dr. Madhu": "Dr. Madhu के साथ 1:1 प्राइवेट कंसल्टेशन",
+  "Personalized diagnosis & treatment plan": "आपके लिए ख़ास डायग्नोसिस और इलाज का प्लान",
+  "100% confidential — zero judgment": "100% गोपनीय — कोई झिझक नहीं",
+  "Online or in-clinic — your choice": "ऑनलाइन या क्लिनिक में — आपकी मर्ज़ी",
+  "Results visible in 3–5 days": "असर 3–5 दिनों में दिखता है",
+  "7-day WhatsApp follow-up support": "7 दिन WhatsApp फॉलो-अप सपोर्ट",
+  "Book My Consultation — ₹497 →": "मेरी कंसल्टेशन बुक करें — ₹497 →",
+
+  // ===== PROBLEMS =====
+  "What We Treat": "हम क्या इलाज करते हैं",
+  "Whatever The Problem —": "समस्या चाहे जो भी हो —",
+  "Dr. Madhu Has Seen It Before.": "Dr. Madhu ने पहले भी देखी है।",
+  "Erectile Dysfunction": "इरेक्टाइल डिसफंक्शन",
+  "No erection, weak erection, or can't maintain it. Treated naturally without pills or injections.": "इरेक्शन न आना, कमज़ोर इरेक्शन, या टिक न पाना। बिना गोली या इंजेक्शन के, प्राकृतिक तरीके से इलाज।",
+  "Premature Ejaculation": "शीघ्रपतन",
+  "Finishing too early during sex. Embarrassing your partner. Permanent solution available.": "सेक्स के दौरान जल्दी डिस्चार्ज हो जाना। पार्टनर के सामने शर्मिंदगी। स्थायी समाधान मौजूद है।",
+  "Low Libido": "कामेच्छा में कमी",
+  "No desire for sex. Partner wants intimacy but you don't. Hormonal restoration, naturally.": "सेक्स की इच्छा न होना। पार्टनर नज़दीकी चाहता है पर आपका मन नहीं करता। प्राकृतिक तरीके से हार्मोन संतुलन।",
+  "Male Infertility": "पुरुष बांझपन",
+  "Low sperm count or poor sperm quality causing difficulty in conceiving. 100% Ayurvedic solution.": "स्पर्म काउंट कम या क्वालिटी ख़राब होने से संतान में दिक्कत। 100% आयुर्वेदिक समाधान।",
+  "Nightfall": "स्वप्नदोष",
+  "Involuntary discharge during sleep causing weakness and anxiety. Controlled naturally.": "नींद में अनचाहा डिस्चार्ज, जिससे कमज़ोरी और घबराहट। प्राकृतिक तरीके से नियंत्रण।",
+  "Low Stamina & Energy": "स्टैमिना और एनर्जी में कमी",
+  "Feeling tired, weak, or exhausted. No confidence in bed. Energy restored from within.": "थकान, कमज़ोरी या सुस्ती। बिस्तर पर आत्मविश्वास की कमी। एनर्जी अंदर से वापस।",
+
+  // ===== WHO THIS IS FOR =====
+  "This Is For You If...": "यह आपके लिए है अगर...",
+  "You Know Something Is": "आपको महसूस होता है कुछ",
+  "Not Right.": "ठीक नहीं है।",
+  "Your partner has complained about your performance or erection": "आपके पार्टनर ने आपकी परफ़ॉर्मेंस या इरेक्शन को लेकर शिकायत की है",
+  "You feel embarrassed or anxious before intimacy": "नज़दीकी से पहले आपको शर्मिंदगी या घबराहट होती है",
+  "You've tried other treatments that didn't work": "आपने दूसरे इलाज आज़माए जो काम नहीं आए",
+  "Your desire for sex has dropped significantly": "आपकी सेक्स की इच्छा काफ़ी कम हो गई है",
+  "You're worried about conceiving or your sperm health": "आप संतान या अपने स्पर्म हेल्थ को लेकर चिंतित हैं",
+  "You want a natural, permanent solution — not temporary pills": "आप प्राकृतिक, स्थायी समाधान चाहते हैं — कुछ देर की गोलियाँ नहीं",
+  "You've been too shy to talk to anyone about this": "आप इस बारे में किसी से बात करने में झिझकते रहे हैं",
+  "You want to talk directly to a trusted expert — not a chatbot or junior doctor": "आप सीधे एक भरोसेमंद एक्सपर्ट से बात करना चाहते हैं — किसी चैटबॉट या जूनियर डॉक्टर से नहीं",
+
+  // ===== VALUE STACK =====
+  "What You Get": "आपको क्या मिलता है",
+  "Everything Included In": "सब कुछ शामिल है आपकी",
+  "Your Consultation Today": "आज की कंसल्टेशन में",
+  "Your consultation today — 50% off, plus free bonuses included": "आज की आपकी कंसल्टेशन — 50% छूट, साथ में फ्री बोनस",
+  "30-Min 1:1 Private Consultation": "30 मिनट 1:1 प्राइवेट कंसल्टेशन",
+  "Direct with Dr. Madhu Sudan — no middlemen": "सीधे Dr. Madhu Sudan से — कोई बिचौलिया नहीं",
+  "Sexual Health Self-Assessment": "सेक्सुअल हेल्थ सेल्फ-असेसमेंट",
+  "2-minute test — know exactly where you stand": "2 मिनट का टेस्ट — जानिए आप कहाँ खड़े हैं",
+  "Daily Sexual Health Power Routine": "डेली सेक्सुअल हेल्थ पावर रूटीन",
+  "7-Day WhatsApp Follow-Up Support": "7 दिन WhatsApp फॉलो-अप सपोर्ट",
+  "Quick guidance after your consultation": "कंसल्टेशन के बाद तुरंत मार्गदर्शन",
+  "Total Value": "कुल कीमत",
+  "You Pay Today": "आज आप देते हैं",
+  "✓ Book My Consultation Now →": "✓ अभी मेरी कंसल्टेशन बुक करें →",
+
+  // ===== HOW IT WORKS =====
+  "The Process": "प्रक्रिया",
+  "Your Consultation —": "आपकी कंसल्टेशन —",
+  "Simple. Private. Effective.": "आसान। प्राइवेट। असरदार।",
+  "Book Your Slot": "अपना स्लॉट बुक करें",
+  "Pay ₹497 to reserve your slot. Dr. Madhu's team confirms your appointment on WhatsApp within 2 hours.": "स्लॉट रिज़र्व करने के लिए ₹497 दें। Dr. Madhu की टीम 2 घंटे के अंदर WhatsApp पर आपका अपॉइंटमेंट कन्फ़र्म करती है।",
+  "Private Consultation": "प्राइवेट कंसल्टेशन",
+  "30-minute one-on-one session directly with Dr. Madhu Sudan. 100% confidential. Online or in-clinic. Zero judgment.": "सीधे Dr. Madhu Sudan के साथ 30 मिनट का आमने-सामने सेशन। 100% गोपनीय। ऑनलाइन या क्लिनिक में। कोई झिझक नहीं।",
+  "Your Healing Begins": "आपका इलाज शुरू",
+  "Receive a personalized Ayurvedic treatment plan. Results visible in 3–5 days. Permanent solution — not just temporary relief.": "आपके लिए ख़ास आयुर्वेदिक इलाज का प्लान मिलता है। असर 3–5 दिनों में। स्थायी समाधान — कुछ देर की राहत नहीं।",
+
+  // ===== AUTHORITY =====
+  "Patients Treated": "मरीज़ों का इलाज",
+  "About Dr. Madhu Sudan": "Dr. Madhu Sudan के बारे में",
+  "India's Leading Ayurvedic Sexologist": "भारत के प्रमुख आयुर्वेदिक सेक्सोलॉजिस्ट",
+  "14+ years of clinical research and practice in Ayurvedic sexual health": "आयुर्वेदिक सेक्सुअल हेल्थ में 14+ साल की क्लिनिकल रिसर्च और प्रैक्टिस",
+  "1,14,000+ patients successfully treated across India": "पूरे भारत में 1,14,000+ मरीज़ों का सफल इलाज",
+  "100% Ayurvedic treatment — zero steroids, zero chemicals": "100% आयुर्वेदिक इलाज — न स्टेरॉयड, न केमिकल",
+  "Specialist in ED, PE, Low Libido, Infertility & Low Sperm Count": "ED, PE, कामेच्छा में कमी, बांझपन और कम स्पर्म काउंट के विशेषज्ञ",
+  "Treats both men and women of all ages safely": "हर उम्र के पुरुष और महिला दोनों का सुरक्षित इलाज",
+  "Permanent results through lifestyle + medicine integration": "लाइफ़स्टाइल + दवा के मेल से स्थायी नतीजे",
+  "100% confidential — your details are never shared": "100% गोपनीय — आपकी जानकारी कभी साझा नहीं होती",
+
+  // ===== SOCIAL PROOF =====
+  "Trusted By": "भरोसा करते हैं",
+  "Bollywood & Beyond.": "बॉलीवुड और उससे आगे।",
+  "From Bollywood stars to professionals across India — those who could choose anyone, chose Dr. Madhu Sudan.": "बॉलीवुड सितारों से लेकर देशभर के प्रोफेशनल्स तक — जो किसी को भी चुन सकते थे, उन्होंने Dr. Madhu Sudan को चुना।",
+  "Patient Stories": "मरीज़ों की कहानियाँ",
+  "Real People.": "असली लोग।",
+  "Real Results.": "असली नतीजे।",
+
+  // ===== FAQ =====
+  "Questions Dr. Madhu Gets": "Dr. Madhu से रोज़ पूछे जाने वाले",
+  "Every Day": "सवाल",
+  "When will I see results?": "मुझे नतीजे कब दिखेंगे?",
+  "Every body is different, but majorly patients see significant improvement within 3–5 days. In some cases results come even faster. A full recovery typically takes 1–2 months depending on your condition and commitment to the treatment plan.": "हर शरीर अलग होता है, पर ज़्यादातर मरीज़ों को 3–5 दिनों में साफ़ सुधार दिखता है। कुछ मामलों में असर और भी जल्दी आता है। पूरी रिकवरी में आमतौर पर 1–2 महीने लगते हैं, जो आपकी स्थिति और इलाज के प्लान पर निर्भर करता है।",
+  "Will my details be kept confidential?": "क्या मेरी जानकारी गोपनीय रहेगी?",
+  "100% yes. Your name, phone number, and all medical details are completely confidential. You will speak directly with Dr. Madhu Sudan — no mediators, no middlemen. Your information is never shared with anyone under any circumstances.": "100% हाँ। आपका नाम, फ़ोन नंबर और सारी मेडिकल जानकारी पूरी तरह गोपनीय रहती है। आप सीधे Dr. Madhu Sudan से बात करते हैं — कोई बिचौलिया नहीं। आपकी जानकारी किसी भी हाल में किसी के साथ साझा नहीं होती।",
+  "Is this a permanent solution?": "क्या यह स्थायी समाधान है?",
+  "Yes. Dr. Madhu doesn't just prescribe medicine — he guides you on lifestyle, diet, and habits too. If you follow his recommendations, you will never face this problem again in your lifetime. This is a permanent solution, not temporary relief.": "हाँ। Dr. Madhu सिर्फ़ दवा नहीं देते — वे आपको लाइफ़स्टाइल, खान-पान और आदतों पर भी मार्गदर्शन देते हैं। अगर आप उनकी सलाह मानते हैं, तो यह समस्या दोबारा नहीं आती। यह स्थायी समाधान है, कुछ देर की राहत नहीं।",
+  "Are there any side effects?": "क्या कोई साइड इफेक्ट है?",
+  "Absolutely not. The treatment is 100% Ayurvedic and 100% safe. No steroids, no chemicals, no injections. It works by naturally activating your body's own glands to produce hormones — not by pumping hormones into your body artificially. Safe for all ages and all health conditions.": "बिल्कुल नहीं। इलाज 100% आयुर्वेदिक और 100% सुरक्षित है। न स्टेरॉयड, न केमिकल, न इंजेक्शन। यह आपके शरीर की अपनी ग्रंथियों को प्राकृतिक रूप से हार्मोन बनाने के लिए सक्रिय करता है — बाहर से हार्मोन डालकर नहीं। हर उम्र और हर स्थिति में सुरक्षित।",
+  "When should I consult a doctor?": "मुझे डॉक्टर से कब मिलना चाहिए?",
+  "If you are repeatedly facing problems — erection issues, finishing too early, your partner is not satisfied, or your desire for sex has dropped — consult now. Don't wait. It's better to seek help before the situation affects your relationship. Early treatment gives the fastest results.": "अगर आप बार-बार समस्या का सामना कर रहे हैं — इरेक्शन की दिक्कत, जल्दी डिस्चार्ज, पार्टनर संतुष्ट नहीं, या सेक्स की इच्छा कम हो गई — तो अभी सलाह लें। इंतज़ार न करें। रिश्ते पर असर पड़ने से पहले मदद लेना बेहतर है। जल्दी इलाज सबसे तेज़ नतीजे देता है।",
+  "What problems does Dr. Madhu treat?": "Dr. Madhu किन समस्याओं का इलाज करते हैं?",
+  "Dr. Madhu treats all forms of sexual health issues — erectile dysfunction, premature ejaculation, low libido, low sperm count, male infertility, nightfall, and loss of sexual confidence — in both men and women, across all ages.": "Dr. Madhu हर तरह की सेक्सुअल हेल्थ समस्या का इलाज करते हैं — इरेक्टाइल डिसफंक्शन, शीघ्रपतन, कामेच्छा में कमी, कम स्पर्म काउंट, पुरुष बांझपन, स्वप्नदोष और सेक्सुअल आत्मविश्वास की कमी — हर उम्र के पुरुष और महिला दोनों में।",
+  "Is the consultation online or in-clinic?": "कंसल्टेशन ऑनलाइन होगी या क्लिनिक में?",
+  "Both options are available. You can consult Dr. Madhu Sudan from the comfort of your home over a private video call, or visit one of his clinics in Kalkaji or Gurgaon. When Dr. Madhu's team confirms your appointment on WhatsApp, you can tell them which you prefer.": "दोनों विकल्प मौजूद हैं। आप घर बैठे प्राइवेट वीडियो कॉल पर Dr. Madhu Sudan से सलाह ले सकते हैं, या कालकाजी या गुड़गांव स्थित उनके क्लिनिक में आ सकते हैं। जब Dr. Madhu की टीम WhatsApp पर आपका अपॉइंटमेंट कन्फ़र्म करे, तब आप उन्हें अपनी पसंद बता सकते हैं।",
+
+  // ===== FINAL CTA =====
+  "Your Partner Deserves The Best Version Of You.": "आपका पार्टनर आपके सबसे बेहतरीन रूप का हक़दार है।",
+  "Don't let another day go by. Book your private consultation with Dr. Madhu Sudan today — and start your healing journey.": "एक और दिन यूँ ही न जाने दें। आज ही Dr. Madhu Sudan के साथ अपनी प्राइवेट कंसल्टेशन बुक करें — और अपने इलाज की यात्रा शुरू करें।",
+  "30-min private session · direct with Dr. Madhu": "30 मिनट का प्राइवेट सेशन · सीधे Dr. Madhu से",
+  "Direct with Dr. Madhu · 100% confidential": "सीधे Dr. Madhu से · 100% गोपनीय",
+  "Book Now →": "अभी बुक करें →",
+
+  // ===== MODAL =====
+  "Book Your Private Consultation": "अपनी प्राइवेट कंसल्टेशन बुक करें",
+  "Enter your details — you'll go straight to secure checkout. Dr. Madhu's team confirms your slot on WhatsApp within 2 hours.": "अपनी जानकारी भरें — आप सीधे सुरक्षित चेकआउट पर जाएँगे। Dr. Madhu की टीम 2 घंटे के अंदर WhatsApp पर आपका स्लॉट कन्फ़र्म करती है।",
+  "1:1 Consultation — ₹497": "1:1 कंसल्टेशन — ₹497",
+  "✓ Continue To Secure Checkout →": "✓ सुरक्षित चेकआउट पर जाएँ →",
+  "🔒 100% confidential · secure payment by Cashfree": "🔒 100% गोपनीय · Cashfree से सुरक्षित भुगतान"
+};
+
+
+// ===== LANGUAGE ENGINE =====
+(function(){
+  // snapshot original English text/placeholder for every leaf element the first time
+  function snapshot(){
+    document.querySelectorAll('body *').forEach(function(el){
+      if (el.closest('.lang-toggle')) return;
+      if (el.tagName==='SCRIPT'||el.tagName==='STYLE') return;
+      // element with a single text node child -> translatable label
+      if (el.children.length===0 && el.textContent && el.textContent.trim().length>0){
+        if (!el.hasAttribute('data-en')) el.setAttribute('data-en', el.textContent.trim());
+      }
+      if (el.placeholder && !el.hasAttribute('data-en-ph')) el.setAttribute('data-en-ph', el.placeholder);
+    });
+  }
+  window.setLang = function(lang){
+    snapshot();
+    document.documentElement.setAttribute('data-lang', lang);
+    document.querySelectorAll('.lang-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.lang===lang); });
+    document.querySelectorAll('[data-en]').forEach(function(el){
+      var en = el.getAttribute('data-en');
+      el.textContent = (lang==='hi' && HI[en]) ? HI[en] : en;
+    });
+    document.querySelectorAll('[data-en-ph]').forEach(function(el){
+      var en = el.getAttribute('data-en-ph');
+      el.placeholder = (lang==='hi' && HI[en]) ? HI[en] : en;
+    });
+    try { localStorage.setItem('consult_lang', lang); } catch(e){}
+    document.documentElement.lang = (lang==='hi') ? 'hi' : 'en';
+  };
+  // default English; restore saved choice if any
+  document.addEventListener('DOMContentLoaded', function(){
+    snapshot();
+    var saved = null;
+    try { saved = localStorage.getItem('consult_lang'); } catch(e){}
+    if (saved==='hi') setLang('hi');
+  });
+})();
 </body>
 </html>

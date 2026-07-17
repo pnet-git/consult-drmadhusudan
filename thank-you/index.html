@@ -3,6 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Meta Pixel -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '921929390306325');
+fbq('track', 'PageView');
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var amount = params.get('amount') || params.get('amt') || params.get('value');
+  var pack = params.get('pack') || 'consult';
+  var data = { currency: 'INR', content_name: pack };
+  if (amount) { var v = parseFloat(String(amount).replace(/[^0-9.]/g, '')); if (!isNaN(v) && v > 0) data.value = v; }
+  fbq('track', 'Purchase', data);
+})();
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=921929390306325&ev=PageView&noscript=1"/></noscript>
+<!-- End Meta Pixel -->
 <title>Booking Confirmed — Dr. Madhu Sudan</title>
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="shortcut icon" href="/favicon.ico">
@@ -258,6 +283,17 @@ body {
 @media (max-width: 480px) {
   .expect-grid { grid-template-columns: 1fr; }
 }
+
+/* === MODAK UPSELL === */
+.upsell-section { padding: 20px 24px 60px; }
+.upsell-card { max-width: 720px; margin: 0 auto; background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%); border-radius: 20px; padding: 44px 36px; text-align: center; color: #fff; box-shadow: var(--shadow-lg); position: relative; overflow: hidden; }
+.upsell-eyebrow { display:inline-block; background: rgba(201,161,74,0.2); border:1px solid var(--gold); color: var(--gold-light); font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:7px 16px; border-radius:50px; margin-bottom:16px; }
+.upsell-card h2 { font-family:'Cormorant Garamond',serif; font-size: clamp(26px,4vw,36px); color:#fff; margin-bottom:14px; line-height:1.2; }
+.upsell-accent { color: var(--gold-light); font-style: italic; }
+.upsell-card p { color: rgba(255,255,255,0.85); font-size:16px; line-height:1.65; max-width:560px; margin:0 auto 26px; }
+.upsell-btn { display:inline-block; background: linear-gradient(135deg, var(--gold) 0%, #B8860B 100%); color: var(--maroon-dark); padding:16px 40px; border-radius:50px; font-size:16px; font-weight:800; text-decoration:none; box-shadow:0 10px 28px rgba(201,161,74,0.4); transition: all .3s ease; }
+.upsell-btn:hover { transform: translateY(-2px); box-shadow:0 14px 34px rgba(201,161,74,0.5); }
+.upsell-note { font-size:12px !important; color: rgba(255,255,255,0.6) !important; margin:18px auto 0 !important; }
 </style>
 </head>
 <body>
@@ -354,6 +390,17 @@ body {
   </div>
 </div>
 
+<!-- MODAK UPSELL -->
+<div class="upsell-section">
+  <div class="upsell-card">
+    <span class="upsell-eyebrow">⭐ While You Wait For Your Consultation</span>
+    <h2>Start Feeling The Difference In <span class="upsell-accent">72 Hours</span></h2>
+    <p>Dr. Madhu's patients don't just wait — they begin. <strong>Kamdev Modak</strong> is his 14-year Ayurvedic formula for energy, confidence, and performance. Start now, and walk into your consultation already on the path.</p>
+    <a href="https://modak.drmadhusudan.com" class="upsell-btn" target="_blank" rel="noopener">Discover Kamdev Modak →</a>
+    <p class="upsell-note">100% Ayurvedic · Zero Side Effects · Trusted by 1,14,000+ patients</p>
+  </div>
+</div>
+
 <!-- CONTACT -->
 <div class="contact-section">
   <h2>Need Help? We're Here.</h2>
@@ -370,5 +417,23 @@ body {
   <p>© 2026 Dr. Madhu Sudan — Arogya Clinic · Samayra Healthcare Pvt. Ltd.</p>
 </div>
 
+
+<script>
+// Fire the Kit paid-tag AFTER payment (buyer stashed by the consult page before checkout).
+(function() {
+  try {
+    var raw = sessionStorage.getItem("consult_buyer");
+    if (!raw) return;
+    var b = JSON.parse(raw);
+    if (!b || !b.email) return;
+    fetch("/api/tag-paid", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: b.name, email: b.email, phone: b.phone })
+    }).catch(function(){});
+    sessionStorage.removeItem("consult_buyer");
+  } catch (e) {}
+})();
+</script>
 </body>
 </html>
