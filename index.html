@@ -1442,6 +1442,13 @@ function handleConsultSubmit(e) {
     sessionStorage.setItem("consult_buyer", JSON.stringify({ name: firstName, email: email, phone: phoneDigits }));
   } catch (err) {}
 
+  // capture the LEAD in Kit now (before payment) so non-payers can be nurtured — fire and forget
+  fetch("/api/tag-lead", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: firstName, email: email, phone: phoneDigits })
+  }).catch(function(){});
+
   if (typeof fbq !== "undefined") fbq("track", "AddToCart", { content_name: "consult" });
   startConsultCheckout(firstName, email, phoneDigits);
 }
