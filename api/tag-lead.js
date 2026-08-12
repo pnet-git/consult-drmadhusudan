@@ -39,7 +39,7 @@ module.exports = async (req, res) => {
       body: JSON.stringify({
         email_address: email,
         first_name: name || undefined,
-        fields: phone ? { phone } : undefined
+        fields: phone ? { phone_number: phone } : undefined
       })
     });
 
