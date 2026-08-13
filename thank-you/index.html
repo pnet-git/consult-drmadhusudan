@@ -18,7 +18,10 @@ fbq('init', '921929390306325');
 fbq('track', 'PageView');
 (function() {
   var params = new URLSearchParams(window.location.search);
-  var amount = params.get('amount') || params.get('amt') || params.get('value');
+  // Cashfree passed the amount in the URL, Razorpay payment pages do not.
+  // The consultation is one fixed price, so fall back to it rather than
+  // reporting a sale with no value, which Meta cannot optimise on.
+  var amount = params.get('amount') || params.get('amt') || params.get('value') || 497;
   var pack = params.get('pack') || 'consult';
   var data = { currency: 'INR', content_name: pack };
   if (amount) { var v = parseFloat(String(amount).replace(/[^0-9.]/g, '')); if (!isNaN(v) && v > 0) data.value = v; }

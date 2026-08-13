@@ -13,8 +13,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<!-- Cashfree JS SDK v3 -->
-<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
 
 <style>
 :root {
@@ -1453,33 +1451,25 @@ function handleConsultSubmit(e) {
   startConsultCheckout(firstName, email, phoneDigits);
 }
 
-async function startConsultCheckout(name, email, phone) {
-  const btn = document.querySelector("#consultForm button[type='submit']");
-  const original = btn ? btn.innerHTML : "";
-  if (btn) { btn.disabled = true; btn.innerHTML = "Processing…"; }
-  try {
-    const resp = await fetch("/api/create-order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pack: "consult", name, email, phone })
-    });
-    const data = await resp.json();
-    if (!resp.ok || !data.payment_session_id) { throw new Error(data.error || "Could not start payment"); }
+// PAYMENT — Razorpay payment page.
+// Cashfree hit its Rs 50,000 pre-KYC ceiling on 13 Aug 2026 and stopped taking
+// money. This page already existed in Razorpay at Rs 497 with the thank-you
+// redirect set. Razorpay records Rs 497 as the organic consult funnel, which is
+// what keeps the organic versus paid-ads split honest in Pulse.
+// Put Cashfree back once its KYC clears.
+const RAZORPAY_CONSULT = "https://pages.razorpay.com/pl_STpo4ultfjDHjp/view";
 
-    const mode = (data.env === "production") ? "production" : "sandbox";
-    const orderId = data.order_id, amount = data.amount;
-    const cashfree = Cashfree({ mode });
-    cashfree.checkout({ paymentSessionId: data.payment_session_id, redirectTarget: "_modal" })
-      .then((result) => {
-        if (result && result.error) { if (btn) { btn.disabled = false; btn.innerHTML = original; } return; }
-        var tyUrl = "/thank-you?order_id=" + encodeURIComponent(orderId || "") +
-                    "&amount=" + encodeURIComponent(amount || "") + "&pack=consult";
-        window.location.href = tyUrl;
-      });
-  } catch (err) {
-    alert("Sorry, we couldn't start the payment. Please try again.");
-    if (btn) { btn.disabled = false; btn.innerHTML = original; }
-  }
+function startConsultCheckout(name, email, phone) {
+  const btn = document.querySelector("#consultForm button[type='submit']");
+  if (btn) { btn.disabled = true; btn.innerHTML = "Taking you to payment\u2026"; }
+
+  // hand his details to Razorpay so he does not type them a second time
+  const url = RAZORPAY_CONSULT
+    + "?prefill[name]=" + encodeURIComponent(name || "")
+    + "&prefill[email]=" + encodeURIComponent(email || "")
+    + "&prefill[contact]=" + encodeURIComponent(phone || "");
+
+  window.location.href = url;
 }
 
 // EN -> HI (Hinglish in Devanagari, Dr. Madhu's landing-page voice).
